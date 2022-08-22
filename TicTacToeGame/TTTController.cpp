@@ -1,6 +1,7 @@
 #include "TTTController.h"
 #include <Windowsx.h>
 #include <string>
+#include <array>
 
 TTTController* TTTController::m_pControllerInstance = nullptr;
 
@@ -46,6 +47,7 @@ void TTTController::releaseInstance()
 
 TTTController::~TTTController()
 {
+	DestroyWindow(m_pHWnd);
 	delete m_ptttGameManager;
 }
 
@@ -95,12 +97,12 @@ LRESULT TTTController::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lP
 		if (m_pControllerInstance == nullptr or m_pControllerInstance->m_ptttGameManager == nullptr)
 			return 404;
 
-		const std::pair<int, int> boxClicked = m_pControllerInstance->m_ptttGameManager->responseToClick(xPos, yPos);
+		const std::array<int, 3> resClick = m_pControllerInstance->m_ptttGameManager->responseToClick(xPos, yPos);
 #if _DEBUG
-		if (boxClicked.first != -1 and boxClicked.second != -1) 
+		if (resClick[1] != -1 and resClick[2] != -1)
 		{
-			std::string strTextToDisplay = "Click on Rectange - , row: " + std::to_string(boxClicked.first)
-				+ ", col: " + std::to_string(boxClicked.second) + "\n";
+			std::string strTextToDisplay = "Click on Rectange - , row: " + std::to_string(resClick[1])
+				+ ", col: " + std::to_string(resClick[2]) + "\n";
 			std::wstring temp = std::wstring(strTextToDisplay.begin(), strTextToDisplay.end());
 			LPCWSTR textToDisplay = (LPCWSTR)temp.c_str();
 			MessageBox(
@@ -111,6 +113,32 @@ LRESULT TTTController::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lP
 			);
 		}		
 #endif
+		if (resClick[0] != -1) // Game ended
+		{
+			std::string strTextToDisplay = "GameOver!! ";
+			if (resClick[0] < 2) // Game was won
+			{
+				strTextToDisplay += "User - " + std::to_string(resClick[0]) + " Won!!";
+			} 
+			else // Game ended in draw
+			{
+				strTextToDisplay += "Ended in a Draw!!";
+			}
+			strTextToDisplay += "\nRETRY??";
+			std::wstring temp = std::wstring(strTextToDisplay.begin(), strTextToDisplay.end());
+			LPCWSTR textToDisplay = (LPCWSTR)temp.c_str();
+			if (MessageBox(m_pControllerInstance->m_pHWnd, textToDisplay, L"Game Over!!", MB_YESNO) == IDYES)
+			{
+				HINSTANCE cpyhInstance = m_pControllerInstance->m_phInstance;
+				int cpynCmdShow = m_pControllerInstance->m_pnCmdShow;
+				TTTController::releaseInstance();
+				TTTController::getInstance(cpyhInstance, cpynCmdShow)->startNewGame();
+			}
+			else
+			{
+				PostQuitMessage(0);
+			}
+		}
 	}
 	break;
 
