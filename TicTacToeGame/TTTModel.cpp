@@ -33,10 +33,63 @@ void TTTModel::updateBoard(const std::pair<int, int> boxClicked)
 		m_pBoardEntries[boxClicked.first][boxClicked.second] = 'X';
 }
 
-bool TTTModel::checkIfGameEnded(const std::pair<int, int> boxClicked)
+int TTTModel::checkWin(const std::pair<int, int> boxClicked)
 {
-	//todo logic
-	return false;
+	int rw = boxClicked.first;
+	int cl = boxClicked.second;
+
+	//check Col
+	bool okCol = m_pBoardEntries[rw][0] != '.';
+	for (int cl_temp = 1; cl_temp < m_pnBoardSize && okCol; cl_temp++)
+	{
+		okCol &= (m_pBoardEntries[rw][cl_temp] == m_pBoardEntries[rw][0]);
+	}
+
+	// check Row
+	bool okRow = m_pBoardEntries[0][cl] != '.';
+	for (int rw_temp = 1; rw_temp < m_pnBoardSize && okRow; rw_temp++)
+	{
+		okRow &= (m_pBoardEntries[rw_temp][cl] == m_pBoardEntries[0][cl]);
+	}
+
+
+	// check Diagonal 1
+	bool okDiagonal1 = false;
+	okDiagonal1 = m_pBoardEntries[0][0] != '.';
+	for (int itemp = 1; itemp < m_pnBoardSize && okDiagonal1; itemp++)
+	{
+		okDiagonal1 &= (m_pBoardEntries[itemp][itemp] == m_pBoardEntries[0][0]);
+	}
+
+
+	bool okDiagonal2 = false; // check Diagonal 2
+	okDiagonal2 = m_pBoardEntries[0][m_pnBoardSize - 1] != '.';
+	for (int itemp = 0, itemp2 = m_pnBoardSize - 1; itemp < m_pnBoardSize && okDiagonal2; itemp++, itemp2--)
+	{
+		okDiagonal2 &= (m_pBoardEntries[itemp][itemp2] == m_pBoardEntries[0][m_pnBoardSize - 1]);
+	}
+
+
+	if (okRow or okCol or okDiagonal1 or okDiagonal2)
+	{
+		return m_pnTurn % 2;
+	}
+	return -1;
+}
+
+int TTTModel::checkDraw(const std::pair<int, int> boxClicked)
+{
+	return m_pnTurn == (m_pnBoardSize * m_pnBoardSize); // game ends in a draw
+}
+
+int TTTModel::checkIfGameEnded(const std::pair<int, int> boxClicked)
+{
+	int winStatus = checkWin(boxClicked);
+	if (winStatus != -1)
+		return winStatus;
+	if (checkDraw(boxClicked))
+		return m_pnBoardSize+1; // no player won but game ended
+	return -1;
 }
 
 const int TTTModel::getTurn()
