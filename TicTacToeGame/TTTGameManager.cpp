@@ -14,7 +14,9 @@ TTTGameManager::~TTTGameManager()
 
 const std::array<int, 3> TTTGameManager::responseToClick(const int xPos, const int yPos)
 {
-	std::array<int, 3> responseArray = {0, -1, -1};
+	std::array<int, 3> responseArray = {-1, -1, -1};
+	if (m_pTTTModel->getTurn() >= m_pTTTModel->getBoardSize() * m_pTTTModel->getBoardSize())
+		return responseArray;
 	std::pair<int, int> boxClicked = m_pTTTView->checkIfClickOnBoard(xPos, yPos);
 	if ((boxClicked.first != -1) and (boxClicked.second != -1) and 
 		(m_pTTTModel->isValidMove(boxClicked))) // click was on Board
@@ -34,22 +36,4 @@ const std::array<int, 3> TTTGameManager::responseToClick(const int xPos, const i
 	responseArray[1] = boxClicked.first;
 	responseArray[2] = boxClicked.second;
 	return responseArray;
-}
-
-void TTTGameManager::actionReplay(HWND hwnd)
-{
-	TTTModel* replayModel = new TTTModel();
-	TTTView* replayView = new TTTView(hwnd, m_pTTTModel->getBoardSize());
-
-	const std::vector<std::pair<int, int>> validMoves = m_pTTTModel->getValidMovesPlayed();
-
-	for (const std::pair<int, int> &boxClicked : validMoves)
-	{
-		replayModel->updateTurn();
-		replayModel->updateBoard(boxClicked);
-		replayView->updateBoard(boxClicked, replayModel->getTurn());
-	}
-
-	delete replayModel;
-	delete replayView;
 }

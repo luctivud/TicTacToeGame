@@ -115,28 +115,46 @@ LRESULT TTTController::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lP
 #endif
 		if (resClick[0] != -1) // Game ended
 		{
-			std::string strTextToDisplay = "GameOver!! ";
+			std::string strTextToDisplay = "Game--Over!! ";
 			if (resClick[0] < 2) // Game was won
 			{
-				strTextToDisplay += "User - " + std::to_string(resClick[0]) + " Won!!";
+				strTextToDisplay += "User :: " + std::to_string(resClick[0]) + " Won!!";
 			} 
 			else // Game ended in draw
 			{
 				strTextToDisplay += "Ended in a Draw!!";
 			}
-			strTextToDisplay += "\nRETRY??";
+			strTextToDisplay += "\nClick Continue to get an action replay, Cancel to exit.";
 			std::wstring temp = std::wstring(strTextToDisplay.begin(), strTextToDisplay.end());
 			LPCWSTR textToDisplay = (LPCWSTR)temp.c_str();
-			if (MessageBox(m_pControllerInstance->m_pHWnd, textToDisplay, L"Game Over!!", MB_YESNO) == IDYES)
+
+			int msgBoxID = (MessageBox(
+				m_pControllerInstance->m_pHWnd,
+				textToDisplay,
+				L"Game Over!!",
+				MB_CANCELTRYCONTINUE | MB_DEFBUTTON2)
+			);
+
+
+			switch (msgBoxID)
 			{
-				HINSTANCE cpyhInstance = m_pControllerInstance->m_phInstance;
-				int cpynCmdShow = m_pControllerInstance->m_pnCmdShow;
-				TTTController::releaseInstance();
-				TTTController::getInstance(cpyhInstance, cpynCmdShow)->startNewGame();
-			}
-			else
-			{
+			case IDCANCEL:
 				PostQuitMessage(0);
+				break;
+			case IDTRYAGAIN:
+				{
+					HINSTANCE cpyhInstance = m_pControllerInstance->m_phInstance;
+					int cpynCmdShow = m_pControllerInstance->m_pnCmdShow;
+					TTTController::releaseInstance();
+					TTTController::getInstance(cpyhInstance, cpynCmdShow)->startNewGame();
+				}
+				break;
+			case IDCONTINUE:
+				{
+					
+					
+				}
+				break;
 			}
 		}
 	}
@@ -153,3 +171,32 @@ LRESULT TTTController::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lP
 	return DefWindowProc(hwnd, uMsg, wParam, lParam);
 }
 
+LRESULT TTTController::ChildWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	switch (uMsg)
+	{
+	case WM_DESTROY:
+	{
+		PostQuitMessage(0);
+		return 0;
+	}
+
+	case WM_PAINT:
+	{
+		PAINTSTRUCT ps;
+		HDC hdc = BeginPaint(hwnd, &ps);
+		FillRect(hdc, &ps.rcPaint, (HBRUSH)(COLOR_WINDOW + 1));
+		EndPaint(hwnd, &ps);
+	}
+	break;
+
+	case WM_CLOSE:
+	{
+		if (MessageBox(hwnd, L"Do you want to quit?", L"Quit - X", MB_OKCANCEL) == IDOK)
+			DestroyWindow(hwnd);
+		// Else: User canceled. Do nothing.
+		return 0;
+	}
+	}
+	return DefWindowProc(hwnd, uMsg, wParam, lParam);
+}

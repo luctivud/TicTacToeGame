@@ -10,10 +10,10 @@ public:
 	static void releaseInstance();
 	virtual ~TTTController();
 	static LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	static LRESULT CALLBACK ChildWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	TTTController(HINSTANCE hInstance, int nCmdShow);
 private:
 	static TTTController* m_pControllerInstance;
-	
 	HINSTANCE m_phInstance;
 	HWND m_pHWnd;
 	int m_pnCmdShow;
