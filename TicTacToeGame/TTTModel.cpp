@@ -3,7 +3,7 @@
 TTTModel::TTTModel() : m_pnTurn(0)
 {
 	m_pBoardEntries.resize(m_pnBoardSize, std::vector<char>(m_pnBoardSize, '.'));
-	
+	m_pValidMovesPlayed.reserve(m_pnBoardSize * m_pnBoardSize);
 }
 
 TTTModel::~TTTModel()
@@ -90,6 +90,17 @@ int TTTModel::checkIfGameEnded(const std::pair<int, int> boxClicked)
 	if (checkDraw(boxClicked))
 		return m_pnBoardSize+1; // no player won but game ended
 	return -1;
+}
+
+void TTTModel::addToValidMoves(const std::pair<int, int> boxClicked) noexcept
+{
+	m_pValidMovesPlayed.push_back(boxClicked);
+	return;
+}
+
+const std::vector<std::pair<int, int>>& TTTModel::getValidMovesPlayed() noexcept
+{
+	return m_pValidMovesPlayed;
 }
 
 const int TTTModel::getTurn()
