@@ -20,8 +20,10 @@ const std::array<int, 3> TTTGameManager::responseToClick(const int xPos, const i
 		(m_pTTTModel->isValidMove(boxClicked))) // click was on Board
 	{
 		m_pTTTModel->updateTurn();
+		m_pTTTModel->addToValidMoves(boxClicked);
 		m_pTTTModel->updateBoard(boxClicked);
 		m_pTTTView->updateBoard(boxClicked, m_pTTTModel->getTurn());
+		
 		responseArray[0] = m_pTTTModel->checkIfGameEnded(boxClicked);
 	}
 	else
@@ -32,4 +34,22 @@ const std::array<int, 3> TTTGameManager::responseToClick(const int xPos, const i
 	responseArray[1] = boxClicked.first;
 	responseArray[2] = boxClicked.second;
 	return responseArray;
+}
+
+void TTTGameManager::actionReplay(HWND hwnd)
+{
+	TTTModel* replayModel = new TTTModel();
+	TTTView* replayView = new TTTView(hwnd, m_pTTTModel->getBoardSize());
+
+	const std::vector<std::pair<int, int>> validMoves = m_pTTTModel->getValidMovesPlayed();
+
+	for (const std::pair<int, int> &boxClicked : validMoves)
+	{
+		replayModel->updateTurn();
+		replayModel->updateBoard(boxClicked);
+		replayView->updateBoard(boxClicked, replayModel->getTurn());
+	}
+
+	delete replayModel;
+	delete replayView;
 }
