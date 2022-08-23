@@ -38,6 +38,67 @@ TTTController::TTTController(HINSTANCE hInstance, int nCmdShow) : m_phInstance(h
 	m_pHWnd = hwnd;
 }
 
+void TTTController::actionReplay()
+{
+	const std::vector<std::pair<int, int>> validMoves = m_ptttGameManager->getValidMovesPlayed();
+	delete m_ptttGameManager;
+	m_ptttGameManager = new TTTGameManager(m_pHWnd);
+	for (const std::pair<int, int>& move : validMoves)
+	{
+		Sleep(1000);
+		std::pair<int, int> coordinatesToClick = m_ptttGameManager->getCoordinatesForActionReplay(move);
+		const std::array<int, 3> resClick = m_ptttGameManager->responseToClick(coordinatesToClick.first, coordinatesToClick.second);
+		displayMessageBoxBasedOnResponse(resClick);
+	}
+}
+
+void TTTController::displayMessageBoxBasedOnResponse(const std::array<int, 3>& resClick) noexcept
+{
+	if (resClick[0] != -1) // Game ended
+	{
+		std::string strTextToDisplay = "Game--Over!! ";
+		if (resClick[0] < 2) // Game was won
+		{
+			strTextToDisplay += "User :: " + std::to_string(resClick[0]) + " Won!!";
+		}
+		else // Game ended in draw
+		{
+			strTextToDisplay += "Ended in a Draw!!";
+		}
+		strTextToDisplay += "\nClick Continue to get an action replay, Cancel to exit.";
+		std::wstring temp = std::wstring(strTextToDisplay.begin(), strTextToDisplay.end());
+		LPCWSTR textToDisplay = (LPCWSTR)temp.c_str();
+
+		int msgBoxID = (MessageBox(
+			m_pControllerInstance->m_pHWnd,
+			textToDisplay,
+			L"Game Over!!",
+			MB_CANCELTRYCONTINUE | MB_DEFBUTTON2)
+			);
+
+		switch (msgBoxID)
+		{
+		case IDCANCEL:
+			PostQuitMessage(0);
+			break;
+		case IDTRYAGAIN:
+		{
+			HINSTANCE cpyhInstance = m_pControllerInstance->m_phInstance;
+			int cpynCmdShow = m_pControllerInstance->m_pnCmdShow;
+			TTTController::releaseInstance();
+			TTTController::getInstance(cpyhInstance, cpynCmdShow)->startNewGame();
+		}
+		break;
+		case IDCONTINUE:
+		{
+			m_pControllerInstance->actionReplay();
+		}
+		break;
+		}
+	}
+}
+
+
 void TTTController::releaseInstance()
 {
 	if (m_pControllerInstance != nullptr)
@@ -53,7 +114,6 @@ TTTController::~TTTController()
 
 int TTTController::startNewGame()
 {
-	
 	ShowWindow(m_pHWnd, m_pnCmdShow);
 
 	m_ptttGameManager = new TTTGameManager(m_pHWnd);
@@ -67,9 +127,6 @@ int TTTController::startNewGame()
 
 	return 1;
 }
-
-
-
 
 LRESULT TTTController::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
@@ -111,52 +168,9 @@ LRESULT TTTController::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lP
 				L"Message Box",
 				MB_OK
 			);
-		}		
-#endif
-		if (resClick[0] != -1) // Game ended
-		{
-			std::string strTextToDisplay = "Game--Over!! ";
-			if (resClick[0] < 2) // Game was won
-			{
-				strTextToDisplay += "User :: " + std::to_string(resClick[0]) + " Won!!";
-			} 
-			else // Game ended in draw
-			{
-				strTextToDisplay += "Ended in a Draw!!";
-			}
-			strTextToDisplay += "\nClick Continue to get an action replay, Cancel to exit.";
-			std::wstring temp = std::wstring(strTextToDisplay.begin(), strTextToDisplay.end());
-			LPCWSTR textToDisplay = (LPCWSTR)temp.c_str();
-
-			int msgBoxID = (MessageBox(
-				m_pControllerInstance->m_pHWnd,
-				textToDisplay,
-				L"Game Over!!",
-				MB_CANCELTRYCONTINUE | MB_DEFBUTTON2)
-			);
-
-
-			switch (msgBoxID)
-			{
-			case IDCANCEL:
-				PostQuitMessage(0);
-				break;
-			case IDTRYAGAIN:
-				{
-					HINSTANCE cpyhInstance = m_pControllerInstance->m_phInstance;
-					int cpynCmdShow = m_pControllerInstance->m_pnCmdShow;
-					TTTController::releaseInstance();
-					TTTController::getInstance(cpyhInstance, cpynCmdShow)->startNewGame();
-				}
-				break;
-			case IDCONTINUE:
-				{
-					
-					
-				}
-				break;
-			}
 		}
+#endif
+		m_pControllerInstance->displayMessageBoxBasedOnResponse(resClick);
 	}
 	break;
 

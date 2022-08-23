@@ -14,9 +14,10 @@ public:
 	TTTController(HINSTANCE hInstance, int nCmdShow);
 private:
 	static TTTController* m_pControllerInstance;
+	void actionReplay();
 	HINSTANCE m_phInstance;
 	HWND m_pHWnd;
 	int m_pnCmdShow;
 	TTTGameManager* m_ptttGameManager;
-	
+	void displayMessageBoxBasedOnResponse(const std::array<int, 3>& resClick) noexcept;
 };

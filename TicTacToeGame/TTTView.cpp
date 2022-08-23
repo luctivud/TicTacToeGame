@@ -82,6 +82,11 @@ void TTTView::updateBoard(const std::pair<int, int>& boxClicked, const int turn)
 	ReleaseDC(m_pHWnd, hdc);
 }
 
+const RECT TTTView::getRectAtRC(const int row, const int col)
+{
+	return m_pBoardCoordinates[row][col];
+}
+
 TTTView::~TTTView()
 {
 }

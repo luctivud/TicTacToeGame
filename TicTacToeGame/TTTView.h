@@ -10,6 +10,7 @@ public:
 	const std::vector<std::vector<RECT>>& getBoardCoordinates();
 	std::pair<int, int> checkIfClickOnBoard(const int xPos, const int yPos);
 	void updateBoard(const std::pair<int, int>& boxClicked, const int turn);
+	const RECT getRectAtRC(const int row, const int col);
 private:
 	HWND m_pHWnd;
 	int m_pnBoardSize;
