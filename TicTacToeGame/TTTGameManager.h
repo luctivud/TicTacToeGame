@@ -11,7 +11,7 @@ public:
 	virtual ~TTTGameManager();
 	const std::array<int, 3> responseToClick(const int xPos, const int yPos);
 	const std::vector<std::pair<int, int>> getValidMovesPlayed();
-	const std::pair<int, int> getCoordinatesForActionReplay(std::pair<int, int> boxClicked);
+	const RECT getRectCoordinatesRC(std::pair<int, int> boxClicked);
 private:
 	HWND m_pHWnd;
 	TTTModel* m_pTTTModel;

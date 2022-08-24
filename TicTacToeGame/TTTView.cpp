@@ -97,8 +97,8 @@ void TTTView::displayBoard()
 {
 	HDC hdc = GetDC(m_pHWnd);
 
-	TCHAR textToDisplayAsHeader[] = L"Play TicTacToe - \n";
-	TextOut(hdc, UserSettings::OFFSET_X, 10, textToDisplayAsHeader, (int)wcslen(textToDisplayAsHeader));
+	/*TCHAR textToDisplayAsHeader[] = L"Play TicTacToe - \n";
+	TextOut(hdc, UserSettings::OFFSET_X, 10, textToDisplayAsHeader, (int)wcslen(textToDisplayAsHeader));*/
 
 	for (int irow = 0; irow < m_pnBoardSize; irow++)
 	{

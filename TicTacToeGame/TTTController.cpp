@@ -45,8 +45,9 @@ void TTTController::actionReplay()
 	m_ptttGameManager = new TTTGameManager(m_pHWnd);
 	for (const std::pair<int, int>& move : validMoves)
 	{
-		Sleep(1000);
-		std::pair<int, int> coordinatesToClick = m_ptttGameManager->getCoordinatesForActionReplay(move);
+		Sleep(200);
+		const RECT rect = m_ptttGameManager->getRectCoordinatesRC(move);
+		std::pair<int, int> coordinatesToClick = { (rect.left + rect.right) / 2, (rect.top + rect.bottom) / 2 };
 		const std::array<int, 3> resClick = m_ptttGameManager->responseToClick(coordinatesToClick.first, coordinatesToClick.second);
 		displayMessageBoxBasedOnResponse(resClick);
 	}
@@ -98,7 +99,6 @@ void TTTController::displayMessageBoxBasedOnResponse(const std::array<int, 3>& r
 	}
 }
 
-
 void TTTController::releaseInstance()
 {
 	if (m_pControllerInstance != nullptr)
@@ -118,6 +118,13 @@ int TTTController::startNewGame()
 
 	m_ptttGameManager = new TTTGameManager(m_pHWnd);
 
+	RECT rect = m_ptttGameManager->getRectCoordinatesRC({ 2, 2 });
+
+	SetWindowPos(m_pHWnd, 0, 0, 0, rect.right + 60, rect.bottom + 75, SWP_NOMOVE | SWP_NOOWNERZORDER | SWP_NOZORDER);
+
+	HMENU hmenu = LoadMenuA(m_phInstance, MAKEINTRESOURCEA(IDI_TICTACTOEGAME));
+	SetMenu(m_pHWnd, hmenu);
+
 	MSG msg = { };
 	while (GetMessage(&msg, NULL, 0, 0) > 0)
 	{
@@ -128,15 +135,61 @@ int TTTController::startNewGame()
 	return 1;
 }
 
+
+int TTTController::LbuttonDown(HWND hwnd, LPARAM lParam)
+{
+	int xPos = GET_X_LPARAM(lParam);
+	int yPos = GET_Y_LPARAM(lParam);
+	if (m_pControllerInstance == nullptr or m_pControllerInstance->m_ptttGameManager == nullptr)
+		return 404;
+
+	const std::array<int, 3> resClick = m_pControllerInstance->m_ptttGameManager->responseToClick(xPos, yPos);
+#if _DEBUG
+	if (resClick[1] != -1 and resClick[2] != -1)
+	{
+		std::string strTextToDisplay = "Click on Rectange - , row: " + std::to_string(resClick[1])
+			+ ", col: " + std::to_string(resClick[2]) + "\n";
+		std::wstring temp = std::wstring(strTextToDisplay.begin(), strTextToDisplay.end());
+		LPCWSTR textToDisplay = (LPCWSTR)temp.c_str();
+		MessageBox(
+			m_pControllerInstance->m_pHWnd,
+			textToDisplay,
+			L"Message Box",
+			MB_OK
+		);
+	}
+#endif
+	m_pControllerInstance->displayMessageBoxBasedOnResponse(resClick);
+	return 0;
+}
+
+void TTTController::ExitGame(HWND hwnd)
+{
+	if (MessageBox(hwnd, L"Do you want to quit?", L"Quit - X", MB_OKCANCEL) == IDOK)
+		DestroyWindow(hwnd);
+}
+
 LRESULT TTTController::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch (uMsg)
 	{
+	case WM_COMMAND:
+		switch (LOWORD(wParam))
+		{
+		case ID_NEWGAME32772:
+			m_pControllerInstance->startNewGame();   // application-defined
+			break;
+
+		case ID_EXIT:
+			m_pControllerInstance->ExitGame(hwnd);  // application-defined
+			break;
+		case ID_REPLAY:
+			break;
+		}
+		return 0;
 	case WM_DESTROY:
-	{
 		PostQuitMessage(0);
 		return 0;
-	}
 
 	case WM_PAINT:
 	{
@@ -149,66 +202,13 @@ LRESULT TTTController::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lP
 
 	case WM_LBUTTONDOWN:
 	{
-		int xPos = GET_X_LPARAM(lParam);
-		int yPos = GET_Y_LPARAM(lParam);
-		if (m_pControllerInstance == nullptr or m_pControllerInstance->m_ptttGameManager == nullptr)
-			return 404;
-
-		const std::array<int, 3> resClick = m_pControllerInstance->m_ptttGameManager->responseToClick(xPos, yPos);
-#if _DEBUG
-		if (resClick[1] != -1 and resClick[2] != -1)
-		{
-			std::string strTextToDisplay = "Click on Rectange - , row: " + std::to_string(resClick[1])
-				+ ", col: " + std::to_string(resClick[2]) + "\n";
-			std::wstring temp = std::wstring(strTextToDisplay.begin(), strTextToDisplay.end());
-			LPCWSTR textToDisplay = (LPCWSTR)temp.c_str();
-			MessageBox(
-				m_pControllerInstance->m_pHWnd,
-				textToDisplay,
-				L"Message Box",
-				MB_OK
-			);
-		}
-#endif
-		m_pControllerInstance->displayMessageBoxBasedOnResponse(resClick);
+		m_pControllerInstance->LbuttonDown(hwnd, lParam);
 	}
 	break;
 
 	case WM_CLOSE:
 	{
-		if (MessageBox(hwnd, L"Do you want to quit?", L"Quit - X", MB_OKCANCEL) == IDOK)
-			DestroyWindow(hwnd);
-		// Else: User canceled. Do nothing.
-		return 0;
-	}
-	}
-	return DefWindowProc(hwnd, uMsg, wParam, lParam);
-}
-
-LRESULT TTTController::ChildWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
-	switch (uMsg)
-	{
-	case WM_DESTROY:
-	{
-		PostQuitMessage(0);
-		return 0;
-	}
-
-	case WM_PAINT:
-	{
-		PAINTSTRUCT ps;
-		HDC hdc = BeginPaint(hwnd, &ps);
-		FillRect(hdc, &ps.rcPaint, (HBRUSH)(COLOR_WINDOW + 1));
-		EndPaint(hwnd, &ps);
-	}
-	break;
-
-	case WM_CLOSE:
-	{
-		if (MessageBox(hwnd, L"Do you want to quit?", L"Quit - X", MB_OKCANCEL) == IDOK)
-			DestroyWindow(hwnd);
-		// Else: User canceled. Do nothing.
+		m_pControllerInstance->ExitGame(hwnd);
 		return 0;
 	}
 	}

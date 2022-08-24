@@ -43,8 +43,7 @@ const std::vector<std::pair<int, int>> TTTGameManager::getValidMovesPlayed()
 	return m_pTTTModel->getValidMovesPlayed();
 }
 
-const std::pair<int, int> TTTGameManager::getCoordinatesForActionReplay(std::pair<int, int> boxClicked)
+const RECT TTTGameManager::getRectCoordinatesRC(std::pair<int, int> boxClicked)
 {
-	const RECT rect = m_pTTTView->getRectAtRC(boxClicked.first, boxClicked.second);
-	return { (rect.left + rect.right) / 2, (rect.top + rect.bottom) / 2 };
+	return m_pTTTView->getRectAtRC(boxClicked.first, boxClicked.second);
 }
