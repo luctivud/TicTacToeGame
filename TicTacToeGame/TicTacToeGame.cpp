@@ -2,12 +2,12 @@
 //
 
 #include "resource.h"
-#include "TTTController.h"
+#include "Controller.h"
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow)
 {
-	TTTController::getInstance(hInstance, nCmdShow)->startNewGame();
-	TTTController::releaseInstance();
+	Controller::getInstance(hInstance, nCmdShow)->startNewGame();
+	Controller::releaseInstance();
 	return 0;
 }
 

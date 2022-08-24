@@ -4,13 +4,14 @@
 
 #include <vector>
 
-class TTTModel
+class Model
 {
 public:
-	TTTModel();
-	virtual ~TTTModel();
+	Model();
+	virtual ~Model();
 	int updateTurn();
 	const int getBoardSize();
+	bool getGameOver();
 	bool isValidMove(const std::pair<int, int> boxClicked);
 	void updateBoard(const std::pair<int, int> boxClicked);
 	int checkIfGameEnded(const std::pair<int, int> boxClicked);
@@ -18,6 +19,7 @@ public:
 	const std::vector<std::pair<int, int>>& getValidMovesPlayed() noexcept;
 	const int getTurn();
 private:
+	bool mIsGameOver = false;
 	const int m_pnUsers = 2;
 	const int m_pnBoardSize = 3;
 	int m_pnTurn = 0;

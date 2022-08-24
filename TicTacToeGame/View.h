@@ -1,20 +1,20 @@
 #pragma once
 #include <windows.h>
 #include <vector>
-class TTTView
+class View
 {
 public:
-	TTTView(HWND hwnd, const int boardSize);
-	~TTTView();
+	View(HWND hwnd, const int boardSize);
+	~View();
 	void displayBoard();
 	const std::vector<std::vector<RECT>>& getBoardCoordinates();
 	std::pair<int, int> checkIfClickOnBoard(const int xPos, const int yPos);
 	void updateBoard(const std::pair<int, int>& boxClicked, const int turn);
 	const RECT getRectAtRC(const int row, const int col);
 private:
-	HWND m_pHWnd;
+	HWND mHWnd;
 	int m_pnBoardSize;
-	std::vector<std::vector<RECT>> m_pBoardCoordinates;
+	std::vector<std::vector<RECT>> mBoardCoordinates;
 	void drawCircle(HDC hdc, RECT rect);
 	void drawCross(HDC hdc, RECT rect);
 };

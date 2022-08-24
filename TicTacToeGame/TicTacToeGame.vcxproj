@@ -130,17 +130,17 @@
     <ClInclude Include="framework.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="TTTController.h" />
-    <ClInclude Include="TTTGameManager.h" />
-    <ClInclude Include="TTTModel.h" />
-    <ClInclude Include="TTTView.h" />
+    <ClInclude Include="Controller.h" />
+    <ClInclude Include="GameManager.h" />
+    <ClInclude Include="Model.h" />
+    <ClInclude Include="View.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="TicTacToeGame.cpp" />
-    <ClCompile Include="TTTController.cpp" />
-    <ClCompile Include="TTTGameManager.cpp" />
-    <ClCompile Include="TTTModel.cpp" />
-    <ClCompile Include="TTTView.cpp" />
+    <ClCompile Include="Controller.cpp" />
+    <ClCompile Include="GameManager.cpp" />
+    <ClCompile Include="Model.cpp" />
+    <ClCompile Include="View.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="TicTacToeGame.rc" />

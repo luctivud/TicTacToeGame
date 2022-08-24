@@ -1,20 +1,22 @@
 #pragma once
 
-#include "TTTModel.h"
-#include "TTTView.h"
+#include "Model.h"
+#include "View.h"
 #include <array>
 
-class TTTGameManager
+class GameManager
 {
 public:
-	TTTGameManager(HWND hwnd);
-	virtual ~TTTGameManager();
+	GameManager(HWND hwnd);
+	virtual ~GameManager();
 	const std::array<int, 3> responseToClick(const int xPos, const int yPos);
 	const std::vector<std::pair<int, int>> getValidMovesPlayed();
 	const RECT getRectCoordinatesRC(std::pair<int, int> boxClicked);
+	bool checkGameOver();
 private:
-	HWND m_pHWnd;
-	TTTModel* m_pTTTModel;
-	TTTView* m_pTTTView;
+	HWND mHWnd;
+	//std::unique_ptr<Model> mpModel;
+	Model* mpModel;
+	View* mpView;
 };
 

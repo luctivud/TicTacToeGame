@@ -1,31 +1,36 @@
-#include "TTTModel.h"
+#include "Model.h"
 
-TTTModel::TTTModel() : m_pnTurn(0)
+Model::Model() : m_pnTurn(0), mIsGameOver(false)
 {
 	m_pBoardEntries.resize(m_pnBoardSize, std::vector<char>(m_pnBoardSize, '.'));
 	m_pValidMovesPlayed.reserve(m_pnBoardSize * m_pnBoardSize);
 }
 
-TTTModel::~TTTModel()
+Model::~Model()
 {
 }
 
-int TTTModel::updateTurn()
+int Model::updateTurn()
 {
 	return ++m_pnTurn;
 }
 
-const int TTTModel::getBoardSize()
+const int Model::getBoardSize()
 {
 	return m_pnBoardSize;
 }
 
-bool TTTModel::isValidMove(const std::pair<int, int> boxClicked)
+bool Model::getGameOver()
+{
+	return mIsGameOver;
+}
+
+bool Model::isValidMove(const std::pair<int, int> boxClicked)
 {
 	return (m_pBoardEntries[boxClicked.first][boxClicked.second] == '.');
 }
 
-void TTTModel::updateBoard(const std::pair<int, int> boxClicked)
+void Model::updateBoard(const std::pair<int, int> boxClicked)
 {
 	if (m_pnTurn % 2 == 0)
 		m_pBoardEntries[boxClicked.first][boxClicked.second] = 'O';
@@ -33,7 +38,7 @@ void TTTModel::updateBoard(const std::pair<int, int> boxClicked)
 		m_pBoardEntries[boxClicked.first][boxClicked.second] = 'X';
 }
 
-int TTTModel::checkWin(const std::pair<int, int> boxClicked)
+int Model::checkWin(const std::pair<int, int> boxClicked)
 {
 	int rw = boxClicked.first;
 	int cl = boxClicked.second;
@@ -77,33 +82,41 @@ int TTTModel::checkWin(const std::pair<int, int> boxClicked)
 	return -1;
 }
 
-int TTTModel::checkDraw(const std::pair<int, int> boxClicked)
+int Model::checkDraw(const std::pair<int, int> boxClicked)
 {
 	return m_pnTurn == (m_pnBoardSize * m_pnBoardSize); // game ends in a draw
 }
 
-int TTTModel::checkIfGameEnded(const std::pair<int, int> boxClicked)
+int Model::checkIfGameEnded(const std::pair<int, int> boxClicked)
 {
 	int winStatus = checkWin(boxClicked);
-	if (winStatus != -1)
+	if (winStatus != -1) 
+	{
+		mIsGameOver = true;
 		return winStatus;
+	}
+		
 	if (checkDraw(boxClicked))
-		return m_pnBoardSize+1; // no player won but game ended
+	{
+		mIsGameOver = true;
+		return m_pnBoardSize + 1; // no player won but game ended
+	}
+		
 	return -1;
 }
 
-void TTTModel::addToValidMoves(const std::pair<int, int> boxClicked) noexcept
+void Model::addToValidMoves(const std::pair<int, int> boxClicked) noexcept
 {
 	m_pValidMovesPlayed.push_back(boxClicked);
 	return;
 }
 
-const std::vector<std::pair<int, int>>& TTTModel::getValidMovesPlayed() noexcept
+const std::vector<std::pair<int, int>>& Model::getValidMovesPlayed() noexcept
 {
 	return m_pValidMovesPlayed;
 }
 
-const int TTTModel::getTurn()
+const int Model::getTurn()
 {
 	return m_pnTurn;
 }
