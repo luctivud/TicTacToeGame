@@ -5,8 +5,6 @@
 #include <array>
 
 
-
-
 GameManager* GameManager::spManagerInstance = nullptr;
 
 GameManager* GameManager::getInstance(HWND hwnd)
@@ -47,11 +45,11 @@ void GameManager::startNewGame(int nCmdShow)
 	}
 }
 
-const std::array<int, 3> GameManager::responseToClick(const int xPos, const int yPos) // why return by value 
+void GameManager::responseToClick(const int xPos, const int yPos, std::array<int, 3> & responseArray) // why return by value 
 {
-	std::array<int, 3> responseArray = {-1, -1, -1};
+	responseArray = {-1, -1, -1};
 	if (mpModel->getTurn() >= mpModel->getBoardSize() * mpModel->getBoardSize())
-		return responseArray;
+		return;
 	std::pair<int, int> boxClicked = mpView->checkIfClickOnBoard(xPos, yPos);
 	if ((boxClicked.first != -1) and (boxClicked.second != -1) and 
 		(mpModel->isValidMove(boxClicked))) // click was on Board
@@ -70,7 +68,7 @@ const std::array<int, 3> GameManager::responseToClick(const int xPos, const int 
 
 	responseArray[1] = boxClicked.first;
 	responseArray[2] = boxClicked.second;
-	return responseArray;
+	return;
 }
 
 const std::vector<std::pair<int, int>> GameManager::getValidMovesPlayed()
@@ -120,7 +118,8 @@ int GameManager::LbuttonDown(HWND hwnd, LPARAM lParam)
 	if (spManagerInstance == nullptr)
 		return 404;
 
-	const std::array<int, 3> resClick = responseToClick(xPos, yPos);
+	std::array<int, 3> resClick;
+	responseToClick(xPos, yPos, resClick);
 #if _DEBUG
 	if (resClick[1] != -1 and resClick[2] != -1)
 	{
@@ -153,7 +152,8 @@ void GameManager::actionReplay()
 		Sleep(500);
 		const RECT rect = getRectCoordinatesRC(move);
 		std::pair<int, int> coordinatesToClick = { (rect.left + rect.right) / 2, (rect.top + rect.bottom) / 2 };
-		const std::array<int, 3> resClick = responseToClick(coordinatesToClick.first, coordinatesToClick.second);
+		std::array<int, 3> resClick;
+		responseToClick(coordinatesToClick.first, coordinatesToClick.second, resClick);
 		displayMessageBoxBasedOnResponse(resClick);
 	}
 }

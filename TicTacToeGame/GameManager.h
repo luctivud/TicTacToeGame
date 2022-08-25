@@ -16,11 +16,22 @@ public:
 
 	~GameManager();
 
-	/**
+	/*
 	* Starts a new game
 	*/
 	void startNewGame(int nCmdShow);
-	const std::array<int, 3> responseToClick(const int xPos, const int yPos);
+
+	/*
+	* @param [in] x-coordinate on screen
+	* @param [in] y-coordinate on screem
+	* @param [in/out] response array to display message box
+	* @brief checks the position of click and its validity and performs updation in model and view
+	* the response is of type array, where 
+	* [0] -> GameStatus, 
+	* [1] -> row clicked, 
+	* [2] -> col clicked
+	*/
+	void responseToClick(const int xPos, const int yPos, std::array<int, 3> &resClick);
 	const std::vector<std::pair<int, int>> getValidMovesPlayed();
 	const RECT getRectCoordinatesRC(std::pair<int, int> boxClicked);
 	void actionReplay();
@@ -36,5 +47,4 @@ private:
 	std::unique_ptr <View> mpView;
 
 	HWND mHWnd;
-	
 };
