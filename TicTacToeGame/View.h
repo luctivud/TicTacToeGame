@@ -13,7 +13,7 @@ public:
 	const RECT getRectAtRC(const int row, const int col);
 private:
 	HWND mHWnd;
-	int m_pnBoardSize;
+	int mBoardSize;
 	std::vector<std::vector<RECT>> mBoardCoordinates;
 	void drawCircle(HDC hdc, RECT rect);
 	void drawCross(HDC hdc, RECT rect);

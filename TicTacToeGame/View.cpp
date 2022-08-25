@@ -1,12 +1,13 @@
 #include "View.h"
 
-View::View(HWND hwnd, const int boardSize) : mHWnd(hwnd), m_pnBoardSize(boardSize)
+View::View(HWND hwnd, const int boardSize) : mHWnd(hwnd), mBoardSize(boardSize)
 {
-	mBoardCoordinates.resize(m_pnBoardSize, std::vector<RECT>(m_pnBoardSize, { -1, -1, -1, -1 }));
+	UpdateWindow(mHWnd);
+	mBoardCoordinates.resize(mBoardSize, std::vector<RECT>(mBoardSize, { -1, -1, -1, -1 }));
 
-	for (int irow = 0; irow < m_pnBoardSize; irow++)
+	for (int irow = 0; irow < mBoardSize; irow++)
 	{
-		for (int icol = 0; icol < m_pnBoardSize; icol++)
+		for (int icol = 0; icol < mBoardSize; icol++)
 		{
 			RECT rect;
 			rect.left = UserSettings::OFFSET_X + UserSettings::SZ_SQUARE * icol; // int currTopX
@@ -17,10 +18,14 @@ View::View(HWND hwnd, const int boardSize) : mHWnd(hwnd), m_pnBoardSize(boardSiz
 		}
 	}
 
-	PAINTSTRUCT ps;
-	HDC hdc = BeginPaint(mHWnd, &ps);
-	FillRect(hdc, &ps.rcPaint, (HBRUSH)(CreateSolidBrush(RGB(255, 255, 255)))); // COLOR_WINDOW + 1
-	EndPaint(mHWnd, &ps);
+
+	SetWindowPos
+	(
+		mHWnd,
+		0,
+		0, 0, mBoardCoordinates[2][2].right + 60, mBoardCoordinates[2][2].bottom + 75,
+		SWP_NOMOVE | SWP_NOOWNERZORDER | SWP_NOZORDER
+	);
 }
 
 const std::vector<std::vector<RECT>>& View::getBoardCoordinates()
@@ -31,9 +36,9 @@ const std::vector<std::vector<RECT>>& View::getBoardCoordinates()
 std::pair<int, int> View::checkIfClickOnBoard(const int xPos, const int yPos)
 {
 	std::pair<int, int> resBoardBoxClicked = {-1, -1};
-	for (int irow = 0; irow < m_pnBoardSize; irow++)
+	for (int irow = 0; irow < mBoardSize; irow++)
 	{
-		for (int icol = 0; icol < m_pnBoardSize; icol++)
+		for (int icol = 0; icol < mBoardSize; icol++)
 		{
 			const RECT& rect = mBoardCoordinates[irow][icol];
 			if ((xPos >= rect.left) && (xPos <= rect.right) && (yPos >= rect.top) && (yPos <= rect.bottom))
@@ -100,9 +105,9 @@ void View::displayBoard()
 	/*TCHAR textToDisplayAsHeader[] = L"Play TicTacToe - \n";
 	TextOut(hdc, UserSettings::OFFSET_X, 10, textToDisplayAsHeader, (int)wcslen(textToDisplayAsHeader));*/
 
-	for (int irow = 0; irow < m_pnBoardSize; irow++)
+	for (int irow = 0; irow < mBoardSize; irow++)
 	{
-		for (int icol = 0; icol < m_pnBoardSize; icol++)
+		for (int icol = 0; icol < mBoardSize; icol++)
 		{
 			RECT rect = mBoardCoordinates[irow][icol];
 			Rectangle(hdc, rect.left, rect.top, rect.right, rect.bottom);

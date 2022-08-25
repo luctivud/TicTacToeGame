@@ -1,18 +1,50 @@
 #include "GameManager.h"
 
+#include <Windowsx.h>
+#include <string>
+#include <array>
 
-GameManager::GameManager(HWND hwnd) 
+
+
+
+GameManager* GameManager::spManagerInstance = nullptr;
+
+GameManager* GameManager::getInstance(HWND hwnd)
+{
+	if (spManagerInstance == nullptr)
+		spManagerInstance = new GameManager(hwnd);
+	return spManagerInstance;
+}
+
+void GameManager::releaseInstance()
+{
+	if (spManagerInstance != nullptr)
+		delete spManagerInstance;
+	spManagerInstance = nullptr;
+}
+
+GameManager::GameManager(HWND hwnd)
 	: mHWnd(hwnd)
 	, mpModel(new Model())
 	, mpView(new View(hwnd, mpModel->getBoardSize()))
 {
-	mpView->displayBoard();
+	
 }
 
 GameManager::~GameManager()
 {
-	delete mpView; //recommend using smart pointers
-	delete mpModel;
+}
+
+void GameManager::startNewGame(int nCmdShow)
+{
+	mpView->displayBoard();
+	
+	MSG msg = { };
+	while (GetMessage(&msg, NULL, 0, 0) > 0)
+	{
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+	}
 }
 
 const std::array<int, 3> GameManager::responseToClick(const int xPos, const int yPos) // why return by value 
@@ -51,7 +83,84 @@ const RECT GameManager::getRectCoordinatesRC(std::pair<int, int> boxClicked)
 	return mpView->getRectAtRC(boxClicked.first, boxClicked.second);
 }
 
-bool GameManager::checkGameOver()
+
+void GameManager::displayMessageBoxBasedOnResponse(const std::array<int, 3>& resClick)
 {
-	return mpModel->getGameOver();
+	if (resClick[0] != -1) // Game ended
+	{
+		std::string strTextToDisplay = "Game--Over!! ";
+		if (resClick[0] < 2) // Game was won
+		{
+			strTextToDisplay += "User :: " + std::to_string(resClick[0]) + " Won!!";
+		}
+		else // Game ended in draw
+		{
+			strTextToDisplay += "Ended in a Draw!!";
+		}
+		//strTextToDisplay += "\nClick Continue to get an action replay, Cancel to exit.";
+		std::wstring temp = std::wstring(strTextToDisplay.begin(), strTextToDisplay.end());
+		LPCWSTR textToDisplay = (LPCWSTR)temp.c_str();
+
+		int msgBoxID = MessageBox(
+			mHWnd,
+			textToDisplay,
+			L"Game Over!!",
+			MB_OK//MB_CANCELTRYCONTINUE | MB_DEFBUTTON2
+		);
+	}
+}
+
+
+int GameManager::LbuttonDown(HWND hwnd, LPARAM lParam)
+{
+	if (mpModel->getIsGameOver())
+		return 1;
+	int xPos = GET_X_LPARAM(lParam);
+	int yPos = GET_Y_LPARAM(lParam);
+	if (spManagerInstance == nullptr)
+		return 404;
+
+	const std::array<int, 3> resClick = responseToClick(xPos, yPos);
+#if _DEBUG
+	if (resClick[1] != -1 and resClick[2] != -1)
+	{
+		std::string strTextToDisplay = "Click on Rectange - , row: " + std::to_string(resClick[1])
+			+ ", col: " + std::to_string(resClick[2]) + "\n";
+		std::wstring temp = std::wstring(strTextToDisplay.begin(), strTextToDisplay.end());
+		LPCWSTR textToDisplay = (LPCWSTR)temp.c_str();
+		MessageBox(
+			spControllerInstance->mHWnd,
+			textToDisplay,
+			L"Message Box",
+			MB_OK
+		);
+	}
+#endif
+	displayMessageBoxBasedOnResponse(resClick);
+	return 0;
+}
+
+
+
+void GameManager::actionReplay()
+{
+	const std::vector<std::pair<int, int>> validMoves = getValidMovesPlayed();
+	mpModel.reset(new Model());
+	mpView.reset(new View(mHWnd, mpModel->getBoardSize()));
+	mpView->displayBoard();
+	for (const std::pair<int, int>& move : validMoves)
+	{
+		Sleep(500);
+		const RECT rect = getRectCoordinatesRC(move);
+		std::pair<int, int> coordinatesToClick = { (rect.left + rect.right) / 2, (rect.top + rect.bottom) / 2 };
+		const std::array<int, 3> resClick = responseToClick(coordinatesToClick.first, coordinatesToClick.second);
+		displayMessageBoxBasedOnResponse(resClick);
+	}
+}
+
+
+void GameManager::ExitGame()
+{
+	if (MessageBox(mHWnd, L"Do you want to quit?", L"Quit - X", MB_OKCANCEL) == IDOK)
+		DestroyWindow(mHWnd);
 }

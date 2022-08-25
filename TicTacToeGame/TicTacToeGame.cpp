@@ -2,12 +2,95 @@
 //
 
 #include "resource.h"
-#include "Controller.h"
+#include "GameManager.h"
+
+LRESULT WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow)
 {
-	Controller::getInstance(hInstance, nCmdShow)->startNewGame();
-	Controller::releaseInstance();
+	WNDCLASS wc = { };
+	const wchar_t CLASS_NAME[] = L"TicTacToe";
+	wc.lpfnWndProc = WindowProc;
+	wc.hInstance = hInstance;
+	wc.lpszClassName = CLASS_NAME;
+	RegisterClass(&wc);
+
+	HWND hwnd = CreateWindowW(
+		CLASS_NAME,
+		L"TicTacToeGame",
+		WS_OVERLAPPED | WS_SYSMENU,
+		CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
+		NULL,
+		NULL,
+		hInstance,
+		NULL
+	);
+
+	if (hwnd == 0)
+		return 0;// todo_uditg : throw new exception and handle it.
+
+	HMENU hmenu = LoadMenuA(hInstance, MAKEINTRESOURCEA(IDI_TICTACTOEGAME));
+	EnableMenuItem(hmenu, ID_REPLAY, MF_ENABLED);
+	SetMenu(hwnd, hmenu);
+
+	ShowWindow(hwnd, nCmdShow);
+
+	GameManager::getInstance(hwnd)->startNewGame(nCmdShow);
+	GameManager::releaseInstance();
+
+	DestroyWindow(hwnd);
+
 	return 0;
 }
 
+
+LRESULT WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	switch (uMsg)
+	{
+	case WM_COMMAND:
+		switch (LOWORD(wParam))
+		{
+		case ID_NEWGAME32772:
+		{
+			GameManager::releaseInstance();
+			GameManager::getInstance(hwnd)->startNewGame(SW_SHOWDEFAULT);
+		}
+		break;
+
+		case ID_EXIT:
+			GameManager::getInstance(hwnd)->ExitGame();
+			break;
+		case ID_REPLAY:
+			GameManager::getInstance(hwnd)->actionReplay();
+			break;
+		}
+		return 0;
+	case WM_DESTROY:
+		PostQuitMessage(0);
+		return 0;
+
+	case WM_PAINT:
+	{
+		// do nothing
+		/*PAINTSTRUCT ps;
+		HDC hdc = BeginPaint(hwnd, &ps);
+		FillRect(hdc, &ps.rcPaint, (HBRUSH)(COLOR_WINDOW + 1));
+		EndPaint(hwnd, &ps);*/
+	}
+	break;
+
+	case WM_LBUTTONDOWN:
+	{
+		GameManager::getInstance(hwnd)->LbuttonDown(hwnd, lParam);
+	}
+	break;
+
+	case WM_CLOSE:
+	{
+		GameManager::getInstance(hwnd)->ExitGame();
+		return 0;
+	}
+	}
+	return DefWindowProc(hwnd, uMsg, wParam, lParam);
+}
