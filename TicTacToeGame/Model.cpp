@@ -11,13 +11,15 @@ Model::Model() : mTurn(0), mIsGameOver(false)
 Model::~Model()
 {
 }
-
-int Model::updateTurn()
+const int& Model::updateTurn(bool ifUpdateTurn) noexcept
 {
-	return ++mTurn;
+	if (ifUpdateTurn)
+		return ++mTurn;
+	else
+		return mTurn;
 }
 
-const int Model::getBoardSize()
+const int& Model::getBoardSize()
 {
 	return mBoardSize;
 }
@@ -27,12 +29,12 @@ bool Model::getIsGameOver()
 	return mIsGameOver;
 }
 
-bool Model::isValidMove(const std::pair<int, int> boxClicked)
+bool Model::isValidMove(const std::pair<int, int>& boxClicked)
 {
 	return (m_pBoardEntries[boxClicked.first][boxClicked.second] == '.');
 }
 
-void Model::updateBoard(const std::pair<int, int> boxClicked)
+void Model::updateBoard(const std::pair<int, int>& boxClicked)
 {
 	if (mTurn % 2 == 0)
 		m_pBoardEntries[boxClicked.first][boxClicked.second] = 'O';
@@ -40,7 +42,7 @@ void Model::updateBoard(const std::pair<int, int> boxClicked)
 		m_pBoardEntries[boxClicked.first][boxClicked.second] = 'X';
 }
 
-int Model::checkWin(const std::pair<int, int> boxClicked)
+int Model::checkWin(const std::pair<int, int>& boxClicked)
 {
 	int rw = boxClicked.first;
 	int cl = boxClicked.second;
@@ -81,12 +83,12 @@ int Model::checkWin(const std::pair<int, int> boxClicked)
 	return -1;
 }
 
-int Model::checkDraw(const std::pair<int, int> boxClicked)
+int Model::checkDraw(const std::pair<int, int>& boxClicked)
 {
 	return mTurn == (mBoardSize * mBoardSize); // game ends in a draw
 }
 
-int Model::checkIfGameEnded(const std::pair<int, int> boxClicked)
+int Model::checkIfGameEnded(const std::pair<int, int>& boxClicked)
 {
 	int winStatus = checkWin(boxClicked);
 	if (winStatus != -1)
@@ -104,18 +106,13 @@ int Model::checkIfGameEnded(const std::pair<int, int> boxClicked)
 	return -1;
 }
 
-void Model::addToValidMoves(const std::pair<int, int> boxClicked) noexcept
+void Model::addToValidMoves(const std::pair<int, int>& boxClicked) noexcept
 {
 	m_pValidMovesPlayed.push_back(boxClicked);
 	return;
 }
 
-const std::vector<std::pair<int, int>>& Model::getValidMovesPlayed() noexcept
+const std::vector<std::pair<int, int>> Model::getValidMovesPlayed() noexcept
 {
 	return m_pValidMovesPlayed;
-}
-
-const int Model::getTurn()
-{
-	return mTurn;
 }
