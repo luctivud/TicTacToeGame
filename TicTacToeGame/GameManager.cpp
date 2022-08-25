@@ -76,6 +76,19 @@ void GameManager::responseToClick(const int xPos, const int yPos, std::array<int
 void GameManager::displayMessageBoxBasedOnResponse(const std::array<int, 7>& resClick)
 {
 #ifdef _DEBUG
+	if (resClick[1] != -1 and resClick[2] != -1)
+	{
+		std::string strTextToDisplay = "Click on Rectange - , row: " + std::to_string(resClick[1])
+			+ ", col: " + std::to_string(resClick[2]) + "\n";
+		std::wstring temp = std::wstring(strTextToDisplay.begin(), strTextToDisplay.end());
+		LPCWSTR textToDisplay = (LPCWSTR)temp.c_str();
+		MessageBox(
+			spControllerInstance->mHWnd,
+			textToDisplay,
+			L"Message Box",
+			MB_OK
+		);
+	}
 	if (resClick[0] != -1) // Game ended
 	{
 		std::string strTextToDisplay = "Game--Over!! ";
@@ -114,23 +127,11 @@ int GameManager::LbuttonDown(HWND hwnd, LPARAM lParam)
 
 	std::array<int, 7> resClick;
 	responseToClick(xPos, yPos, resClick);
+	displayMessageBoxBasedOnResponse(resClick);
+
 	if (resClick[0] == -1)
 		return 0;
-#if _DEBUG
-	if (resClick[1] != -1 and resClick[2] != -1)
-	{
-		std::string strTextToDisplay = "Click on Rectange - , row: " + std::to_string(resClick[1])
-			+ ", col: " + std::to_string(resClick[2]) + "\n";
-		std::wstring temp = std::wstring(strTextToDisplay.begin(), strTextToDisplay.end());
-		LPCWSTR textToDisplay = (LPCWSTR)temp.c_str();
-		MessageBox(
-			spControllerInstance->mHWnd,
-			textToDisplay,
-			L"Message Box",
-			MB_OK
-		);
-}
-#endif
+
 	HDC hdc = GetDC(mHWnd);
 	HPEN pen = CreatePen(PS_SOLID, 4, UserSettings::COLOR_USER[mpModel->updateTurn(false) % 2]);
 	SelectObject(hdc, pen);
@@ -140,7 +141,7 @@ int GameManager::LbuttonDown(HWND hwnd, LPARAM lParam)
 	LineTo(hdc, (rect2.left + rect2.right) / 2, (rect2.top + rect2.bottom) / 2);
 	DeleteObject(pen);
 	ReleaseDC(mHWnd, hdc);
-	displayMessageBoxBasedOnResponse(resClick);
+	
 	return 0;
 }
 
