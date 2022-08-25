@@ -75,6 +75,7 @@ void GameManager::responseToClick(const int xPos, const int yPos, std::array<int
 
 void GameManager::displayMessageBoxBasedOnResponse(const std::array<int, 7>& resClick)
 {
+#ifdef _DEBUG
 	if (resClick[0] != -1) // Game ended
 	{
 		std::string strTextToDisplay = "Game--Over!! ";
@@ -98,6 +99,7 @@ void GameManager::displayMessageBoxBasedOnResponse(const std::array<int, 7>& res
 			MB_OK//MB_CANCELTRYCONTINUE | MB_DEFBUTTON2
 		);
 	}
+#endif
 }
 
 
