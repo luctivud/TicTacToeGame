@@ -4,7 +4,6 @@
 #include <string>
 #include <array>
 
-
 GameManager* GameManager::spManagerInstance = nullptr;
 
 GameManager* GameManager::getInstance(HWND hwnd)
@@ -26,7 +25,6 @@ GameManager::GameManager(HWND hwnd)
 	, mpModel(new Model())
 	, mpView(new View(hwnd, mpModel->getBoardSize()))
 {
-	
 }
 
 GameManager::~GameManager()
@@ -36,7 +34,7 @@ GameManager::~GameManager()
 void GameManager::startNewGame(int nCmdShow)
 {
 	mpView->displayBoard();
-	
+
 	MSG msg = { };
 	while (GetMessage(&msg, NULL, 0, 0) > 0)
 	{
@@ -45,23 +43,23 @@ void GameManager::startNewGame(int nCmdShow)
 	}
 }
 
-void GameManager::responseToClick(const int xPos, const int yPos, std::array<int, 3> & responseArray) // why return by value 
+void GameManager::responseToClick(const int xPos, const int yPos, std::array<int, 3>& responseArray) // why return by value
 {
-	responseArray = {-1, -1, -1};
+	responseArray = { -1, -1, -1 };
 
-	if (mpModel->getTurn() >= mpModel->getBoardSize() * mpModel->getBoardSize())
+	if (mpModel->updateTurn(false) >= mpModel->getBoardSize() * mpModel->getBoardSize())
 		return;
 
 	std::pair<int, int> boxClicked = mpView->checkIfClickOnBoard(xPos, yPos);
 
-	if ((boxClicked.first != -1) and (boxClicked.second != -1) and 
+	if ((boxClicked.first != -1) and (boxClicked.second != -1) and
 		(mpModel->isValidMove(boxClicked))) // click was on Board
 	{
 		mpModel->updateTurn(true);
 		mpModel->addToValidMoves(boxClicked);
 		mpModel->updateBoard(boxClicked);
-		mpView->updateBoard(boxClicked, mpModel->getTurn());
-		
+		mpView->updateBoard(boxClicked, mpModel->updateTurn(false));
+
 		responseArray[0] = mpModel->checkIfGameEnded(boxClicked);
 	}
 	else
@@ -73,7 +71,6 @@ void GameManager::responseToClick(const int xPos, const int yPos, std::array<int
 	responseArray[2] = boxClicked.second;
 	return;
 }
-
 
 void GameManager::displayMessageBoxBasedOnResponse(const std::array<int, 3>& resClick)
 {
@@ -92,7 +89,8 @@ void GameManager::displayMessageBoxBasedOnResponse(const std::array<int, 3>& res
 		std::wstring temp = std::wstring(strTextToDisplay.begin(), strTextToDisplay.end());
 		LPCWSTR textToDisplay = (LPCWSTR)temp.c_str();
 
-		int msgBoxID = MessageBox(
+		int msgBoxID = MessageBox
+		(
 			mHWnd,
 			textToDisplay,
 			L"Game Over!!",
@@ -100,7 +98,6 @@ void GameManager::displayMessageBoxBasedOnResponse(const std::array<int, 3>& res
 		);
 	}
 }
-
 
 int GameManager::LbuttonDown(HWND hwnd, LPARAM lParam)
 {
@@ -126,13 +123,11 @@ int GameManager::LbuttonDown(HWND hwnd, LPARAM lParam)
 			L"Message Box",
 			MB_OK
 		);
-	}
+}
 #endif
 	displayMessageBoxBasedOnResponse(resClick);
 	return 0;
 }
-
-
 
 void GameManager::actionReplay()
 {
@@ -150,7 +145,6 @@ void GameManager::actionReplay()
 		displayMessageBoxBasedOnResponse(resClick);
 	}
 }
-
 
 void GameManager::ExitGame()
 {
