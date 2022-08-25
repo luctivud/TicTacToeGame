@@ -12,12 +12,14 @@ class GameManager
 public:
 	
 	static GameManager* getInstance(HWND hwnd);
-	static void releaseInstance();
+	static void			releaseInstance();
 
 	~GameManager();
 
 	/*
 	* Starts a new game
+	* @param nCmdShow is a parameter passed during intial window creation by the user 
+		to open window in fullscreen, maximised, or background mode
 	*/
 	void startNewGame(int nCmdShow);
 
@@ -32,19 +34,24 @@ public:
 	* [2] -> col clicked
 	*/
 	void responseToClick(const int xPos, const int yPos, std::array<int, 3> &resClick);
+
+	/*
+	* 
+	*/
 	const std::vector<std::pair<int, int>> getValidMovesPlayed();
 	const RECT getRectCoordinatesRC(std::pair<int, int> boxClicked);
 	void actionReplay();
 	int LbuttonDown(HWND hwnd, LPARAM lParam);
 	void ExitGame();
+
 private:
 	GameManager(HWND hwnd);
 	void displayMessageBoxBasedOnResponse(const std::array<int, 3>& resClick);
 
 	static GameManager* spManagerInstance;
 
-	std::unique_ptr <Model> mpModel;
-	std::unique_ptr <View> mpView;
+	std::unique_ptr <Model>		mpModel;
+	std::unique_ptr <View>		mpView;
 
 	HWND mHWnd;
 };

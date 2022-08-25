@@ -27,6 +27,6 @@ private:
 
 	static const int mBoardSize;
 
-	bool mIsGameOver = false;
-	int mTurn = 0;
+	bool	mIsGameOver;
+	int		mTurn = 0;
 };
