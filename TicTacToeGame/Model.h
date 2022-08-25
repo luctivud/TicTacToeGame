@@ -3,6 +3,7 @@
 #include "resource.h"
 
 #include <vector>
+#include <array>
 
 class Model
 {
@@ -27,7 +28,7 @@ public:
 
 	/**
 	 * get the status of game.
-	 * 
+	 *
 	 * \return true -- if the game is over
 	 * \return false -- if the game is not over
 	 */
@@ -56,8 +57,9 @@ public:
 	/**
 	* @brief checks if after updation of current cell is the game over or not
 	* @param pair of ints {row, col} to define the cell which was last updated
+	* @param [in/out] responseArray for response
 	*/
-	int checkIfGameEnded(const std::pair<int, int>& boxClicked);
+	void checkIfGameEnded(const std::pair<int, int>& boxClicked, std::array<int, 7>& responseArray);
 
 	/**
 	* \brief adds the current move to the vector of valid moves
@@ -78,9 +80,10 @@ private:
 	* \brief helper method to check if the update ended the game in a win.
 	*
 	* \param boxClicked -- pair of ints {row, col} to define the cell which was last updated
+	* \param [in/out] responseArray
 	* \return int -- 0 or 1 if any user won, -1 otherwise
 	*/
-	int checkWin(const std::pair<int, int>& boxClicked);
+	int checkWin(const std::pair<int, int>& boxClicked, std::array<int, 7>& responseArray);
 
 	/**
 	* \brief helper method to check if the update ended the game in a draw.

@@ -45,7 +45,7 @@ public:
 	* @param [in] y-coordinate on screem
 	* @param [in/out] response array to display message box
 	*/
-	void responseToClick(const int xPos, const int yPos, std::array<int, 3> &resClick);
+	void responseToClick(const int xPos, const int yPos, std::array<int, 7> &resClick);
 
 	/**
 	* @brief this method is called when user clicks replay button in the menu
@@ -87,7 +87,7 @@ private:
 		if game is over - display game over message and
 		display the user who won or tied
 	*/
-	void displayMessageBoxBasedOnResponse(const std::array<int, 3>& resClick);
+	void displayMessageBoxBasedOnResponse(const std::array<int, 7>& resClick);
 
 	/**
 	* @brief static pointer instance of GameManager
