@@ -50,7 +50,7 @@ public:
 	/**
 	* @brief this method is called when user clicks replay button in the menu
 		It gets all the valid moves played so far from the model and
-		resets both model and view and then simulates the game played so far.
+		resets both model and view and then stimulates the game played so far.
 	*/
 	void actionReplay();
 
