@@ -14,7 +14,7 @@ GameManager* GameManager::getInstance(HWND hwnd)
 	return spManagerInstance;
 }
 
-void GameManager::releaseInstance()
+void GameManager::releaseInstance(HWND hwnd)
 {
 	if (spManagerInstance != nullptr)
 		delete spManagerInstance;
@@ -48,13 +48,16 @@ void GameManager::startNewGame(int nCmdShow)
 void GameManager::responseToClick(const int xPos, const int yPos, std::array<int, 3> & responseArray) // why return by value 
 {
 	responseArray = {-1, -1, -1};
+
 	if (mpModel->getTurn() >= mpModel->getBoardSize() * mpModel->getBoardSize())
 		return;
+
 	std::pair<int, int> boxClicked = mpView->checkIfClickOnBoard(xPos, yPos);
+
 	if ((boxClicked.first != -1) and (boxClicked.second != -1) and 
 		(mpModel->isValidMove(boxClicked))) // click was on Board
 	{
-		mpModel->updateTurn();
+		mpModel->updateTurn(true);
 		mpModel->addToValidMoves(boxClicked);
 		mpModel->updateBoard(boxClicked);
 		mpView->updateBoard(boxClicked, mpModel->getTurn());
@@ -69,16 +72,6 @@ void GameManager::responseToClick(const int xPos, const int yPos, std::array<int
 	responseArray[1] = boxClicked.first;
 	responseArray[2] = boxClicked.second;
 	return;
-}
-
-const std::vector<std::pair<int, int>> GameManager::getValidMovesPlayed()
-{
-	return mpModel->getValidMovesPlayed();
-}
-
-const RECT GameManager::getRectCoordinatesRC(std::pair<int, int> boxClicked)
-{
-	return mpView->getRectAtRC(boxClicked.first, boxClicked.second);
 }
 
 
@@ -143,14 +136,14 @@ int GameManager::LbuttonDown(HWND hwnd, LPARAM lParam)
 
 void GameManager::actionReplay()
 {
-	const std::vector<std::pair<int, int>> validMoves = getValidMovesPlayed();
+	const std::vector<std::pair<int, int>> validMoves = mpModel->getValidMovesPlayed();
 	mpModel.reset(new Model());
 	mpView.reset(new View(mHWnd, mpModel->getBoardSize()));
 	mpView->displayBoard();
 	for (const std::pair<int, int>& move : validMoves)
 	{
 		Sleep(500);
-		const RECT rect = getRectCoordinatesRC(move);
+		const RECT rect = mpView->getRectAtRC(move.first, move.second);
 		std::pair<int, int> coordinatesToClick = { (rect.left + rect.right) / 2, (rect.top + rect.bottom) / 2 };
 		std::array<int, 3> resClick;
 		responseToClick(coordinatesToClick.first, coordinatesToClick.second, resClick);
@@ -163,4 +156,5 @@ void GameManager::ExitGame()
 {
 	if (MessageBox(mHWnd, L"Do you want to quit?", L"Quit - X", MB_OKCANCEL) == IDOK)
 		DestroyWindow(mHWnd);
+	return;
 }
