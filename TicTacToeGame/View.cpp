@@ -41,7 +41,7 @@ std::pair<int, int> View::checkIfClickOnBoard(const int xPos, const int yPos)
 		for (int icol = 0; icol < mBoardSize; icol++)
 		{
 			const RECT& rect = mBoardCoordinates[irow][icol];
-			if ((xPos >= rect.left) && (xPos <= rect.right) && (yPos >= rect.top) && (yPos <= rect.bottom))
+			if ((xPos > rect.left) && (xPos < rect.right) && (yPos > rect.top) && (yPos < rect.bottom))
 			{
 				resBoardBoxClicked = {irow, icol};
 				break;
