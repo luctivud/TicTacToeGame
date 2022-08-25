@@ -115,6 +115,21 @@ void GameManager::displayMessageBoxBasedOnResponse(const std::array<int, 7>& res
 #endif
 }
 
+void GameManager::drawLineIfWin(const std::array<int, 7>& resClick)
+{
+	if (resClick[0] == -1)
+		return;
+	HDC hdc = GetDC(mHWnd);
+	HPEN pen = CreatePen(PS_SOLID, 4, UserSettings::COLOR_USER[mpModel->updateTurn(false) % 2]);
+	SelectObject(hdc, pen);
+	RECT rect1 = mpView->getRectAtRC(resClick[3], resClick[4]);
+	RECT rect2 = mpView->getRectAtRC(resClick[5], resClick[6]);
+	MoveToEx(hdc, (rect1.left + rect1.right) / 2, (rect1.top + rect1.bottom) / 2, NULL);
+	LineTo(hdc, (rect2.left + rect2.right) / 2, (rect2.top + rect2.bottom) / 2);
+	DeleteObject(pen);
+	ReleaseDC(mHWnd, hdc);
+}
+
 
 int GameManager::LbuttonDown(HWND hwnd, LPARAM lParam)
 {
@@ -129,18 +144,7 @@ int GameManager::LbuttonDown(HWND hwnd, LPARAM lParam)
 	responseToClick(xPos, yPos, resClick);
 	displayMessageBoxBasedOnResponse(resClick);
 
-	if (resClick[0] == -1)
-		return 0;
-
-	HDC hdc = GetDC(mHWnd);
-	HPEN pen = CreatePen(PS_SOLID, 4, UserSettings::COLOR_USER[mpModel->updateTurn(false) % 2]);
-	SelectObject(hdc, pen);
-	RECT rect1 = mpView->getRectAtRC(resClick[3], resClick[4]);
-	RECT rect2 = mpView->getRectAtRC(resClick[5], resClick[6]);
-	MoveToEx(hdc, (rect1.left + rect1.right) / 2, (rect1.top + rect1.bottom) / 2, NULL);
-	LineTo(hdc, (rect2.left + rect2.right) / 2, (rect2.top + rect2.bottom) / 2);
-	DeleteObject(pen);
-	ReleaseDC(mHWnd, hdc);
+	drawLineIfWin(resClick);
 	
 	return 0;
 }
@@ -159,6 +163,7 @@ void GameManager::actionReplay()
 		std::array<int, 7> resClick;
 		responseToClick(coordinatesToClick.first, coordinatesToClick.second, resClick);
 		displayMessageBoxBasedOnResponse(resClick);
+		drawLineIfWin(resClick);
 	}
 }
 

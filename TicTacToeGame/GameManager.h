@@ -90,6 +90,12 @@ private:
 	void displayMessageBoxBasedOnResponse(const std::array<int, 7>& resClick);
 
 	/**
+	* @brief draws a winning line on the squares based on response array
+	* @param responseArray
+	*/
+	void drawLineIfWin(const std::array<int, 7>& resClick);
+
+	/**
 	* @brief static pointer instance of GameManager
 	*/
 	static GameManager* spManagerInstance;
