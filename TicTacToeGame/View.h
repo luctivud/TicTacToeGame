@@ -49,10 +49,16 @@ public:
 	* \return RECT structure representing the coordinates
 	*/
 	const RECT getRectAtRC(const int row, const int col);
+	void InvalidateMoves();
 
 private:
 	void drawCircle(HDC hdc, RECT rect);
 	void drawCross(HDC hdc, RECT rect);
+	void drawAnimatedLine(
+		const std::pair<int, int>& start, 
+		const std::pair<int, int>& end, 
+		int iStyle, int cWidth, COLORREF cref
+	);
 
 	HWND	mHWnd;
 	int		mBoardSize;

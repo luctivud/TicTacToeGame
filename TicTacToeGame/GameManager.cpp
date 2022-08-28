@@ -3,7 +3,8 @@
 #include <Windowsx.h>
 #include <string>
 #include <array>
-#include <gdiplus.h>
+#include <chrono>
+#include <thread>
 
 GameManager* GameManager::spManagerInstance = nullptr;
 
@@ -70,6 +71,11 @@ void GameManager::responseToClick(const int xPos, const int yPos, std::array<int
 
 	responseArray[1] = boxClicked.first;
 	responseArray[2] = boxClicked.second;
+
+	displayMessageBoxBasedOnResponse(responseArray);
+
+	drawLineIfWin(responseArray);
+
 	return;
 }
 
@@ -124,6 +130,7 @@ void GameManager::drawLineIfWin(const std::array<int, 7>& resClick)
 	SelectObject(hdc, pen);
 	RECT rect1 = mpView->getRectAtRC(resClick[3], resClick[4]);
 	RECT rect2 = mpView->getRectAtRC(resClick[5], resClick[6]);
+
 	MoveToEx(hdc, (rect1.left + rect1.right) / 2, (rect1.top + rect1.bottom) / 2, NULL);
 	LineTo(hdc, (rect2.left + rect2.right) / 2, (rect2.top + rect2.bottom) / 2);
 	DeleteObject(pen);
@@ -142,29 +149,33 @@ int GameManager::LbuttonDown(HWND hwnd, LPARAM lParam)
 
 	std::array<int, 7> resClick;
 	responseToClick(xPos, yPos, resClick);
-	displayMessageBoxBasedOnResponse(resClick);
-
-	drawLineIfWin(resClick);
-	
+	if (resClick[1] != -1)
+	{
+		HMENU hmenu = LoadMenuA(GetModuleHandleA(NULL), MAKEINTRESOURCEA(IDI_TICTACTOEGAME));
+		EnableMenuItem(hmenu, ID_REPLAY, MF_ENABLED);
+		SetMenu(mHWnd, hmenu);
+	}
 	return 0;
 }
 
 void GameManager::actionReplay()
 {
+	HMENU hmenu = LoadMenuA(GetModuleHandleA(NULL), MAKEINTRESOURCEA(IDI_TICTACTOEGAME));
+	EnableMenuItem(hmenu, ID_REPLAY, MF_DISABLED);
+	SetMenu(mHWnd, hmenu);
 	const std::vector<std::pair<int, int>> validMoves = mpModel->getValidMovesPlayed();
 	mpModel.reset(new Model());
-	mpView.reset(new View(mHWnd, mpModel->getBoardSize()));
-	mpView->displayBoard();
+	mpView->InvalidateMoves();
 	for (const std::pair<int, int>& move : validMoves)
 	{
-		Sleep(500);
+		std::this_thread::sleep_for(std::chrono::milliseconds(500));
 		const RECT rect = mpView->getRectAtRC(move.first, move.second);
 		std::pair<int, int> coordinatesToClick = { (rect.left + rect.right) / 2, (rect.top + rect.bottom) / 2 };
 		std::array<int, 7> resClick;
 		responseToClick(coordinatesToClick.first, coordinatesToClick.second, resClick);
-		displayMessageBoxBasedOnResponse(resClick);
-		drawLineIfWin(resClick);
 	}
+	EnableMenuItem(hmenu, ID_REPLAY, MF_ENABLED);
+	SetMenu(mHWnd, hmenu);
 }
 
 void GameManager::ExitGame()

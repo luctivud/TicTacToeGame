@@ -19,7 +19,6 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 		return 0;
 
 	HMENU hmenu = LoadMenuA(hInstance, MAKEINTRESOURCEA(IDI_TICTACTOEGAME));
-	EnableMenuItem(hmenu, ID_REPLAY, MF_ENABLED);
 	SetMenu(hwnd, hmenu);
 
 	ShowWindow(hwnd, nCmdShow);

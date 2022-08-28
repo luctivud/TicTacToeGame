@@ -18,7 +18,6 @@ View::View(HWND hwnd, const int boardSize) : mHWnd(hwnd), mBoardSize(boardSize)
 		}
 	}
 
-
 	SetWindowPos
 	(
 		mHWnd,
@@ -35,7 +34,7 @@ const std::vector<std::vector<RECT>>& View::getBoardCoordinates()
 
 std::pair<int, int> View::checkIfClickOnBoard(const int xPos, const int yPos)
 {
-	std::pair<int, int> resBoardBoxClicked = {-1, -1};
+	std::pair<int, int> resBoardBoxClicked = { -1, -1 };
 	for (int irow = 0; irow < mBoardSize; irow++)
 	{
 		for (int icol = 0; icol < mBoardSize; icol++)
@@ -43,7 +42,7 @@ std::pair<int, int> View::checkIfClickOnBoard(const int xPos, const int yPos)
 			const RECT& rect = mBoardCoordinates[irow][icol];
 			if ((xPos > rect.left) && (xPos < rect.right) && (yPos > rect.top) && (yPos < rect.bottom))
 			{
-				resBoardBoxClicked = {irow, icol};
+				resBoardBoxClicked = { irow, icol };
 				break;
 			}
 		}
@@ -77,7 +76,6 @@ void View::updateBoard(const std::pair<int, int>& boxClicked, const int turn)
 
 	SelectObject(hdc, pen);
 
-	
 	if (turn % 2 == 0)
 		drawCircle(hdc, rect);
 	else
@@ -92,27 +90,77 @@ const RECT View::getRectAtRC(const int row, const int col)
 	return mBoardCoordinates[row][col];
 }
 
-View::~View()
-{
-}
-
-
-
-void View::displayBoard()
+void View::InvalidateMoves()
 {
 	HDC hdc = GetDC(mHWnd);
-
-	/*TCHAR textToDisplayAsHeader[] = L"Play TicTacToe - \n";
-	TextOut(hdc, UserSettings::OFFSET_X, 10, textToDisplayAsHeader, (int)wcslen(textToDisplayAsHeader));*/
-
 	for (int irow = 0; irow < mBoardSize; irow++)
 	{
 		for (int icol = 0; icol < mBoardSize; icol++)
 		{
 			RECT rect = mBoardCoordinates[irow][icol];
-			Rectangle(hdc, rect.left, rect.top, rect.right, rect.bottom);
+			rect.left += 4,
+			rect.top += 4,
+			rect.right -= 4,
+			rect.bottom -= 4;
+			FillRect(hdc, &rect, CreateSolidBrush(RGB(255, 255, 255)));
 		}
 	}
 	ReleaseDC(mHWnd, hdc);
 }
 
+View::~View()
+{
+	HDC hdc = GetDC(mHWnd);
+	RECT rect = {
+		getRectAtRC(0, 0).left - 2,
+		getRectAtRC(0, 0).top - 2,
+		getRectAtRC(2, 2).right + 2,
+		getRectAtRC(2, 2).bottom + 2
+	};
+	FillRect(hdc, &rect, CreateSolidBrush(RGB(255, 255, 255)));
+	ReleaseDC(mHWnd, hdc);
+}
+
+void View::drawAnimatedLine(const std::pair<int, int>& start, const std::pair<int, int>& end, int iStyle, int cWidth, COLORREF cref)
+{
+	HDC hdc = GetDC(mHWnd);
+	HPEN pen = CreatePen(iStyle, cWidth, cref);
+	SelectObject(hdc, pen);
+
+	int delayMilliSeconds = 25;
+	double sizeUpdate = 20;
+
+	int height = abs(start.first - end.first);
+	int base = abs(start.second - end.second);
+
+	double theta = atan(double(base) / double(height));
+
+	std::pair<int, int> currPos = start;
+	for (; currPos.first <= end.first and currPos.second <= end.second; )
+	{
+		std::pair<int, int> prevPos = currPos;
+		currPos.first += floor(sizeUpdate * cos(theta));
+		currPos.second += floor(sizeUpdate * sin(theta));
+		if (currPos.first <= end.first and currPos.second <= end.second)
+		{
+			Sleep(delayMilliSeconds);
+			MoveToEx(hdc, prevPos.first, prevPos.second, NULL);
+			LineTo(hdc, currPos.first, currPos.second);
+		}
+	}
+
+	DeleteObject(pen);
+	ReleaseDC(mHWnd, hdc);
+}
+
+void View::displayBoard()
+{
+	RECT rect1 = getRectAtRC(0, 1);
+	RECT rect2 = getRectAtRC(2, 1);
+	drawAnimatedLine({ rect1.left, rect1.top }, { rect2.left, rect2.bottom }, PS_SOLID, 4, RGB(0, 0, 0));
+	drawAnimatedLine({ rect1.right , rect1.top }, { rect2.right, rect2.bottom }, PS_SOLID, 4, RGB(0, 0, 0));
+	rect1 = getRectAtRC(1, 0);
+	rect2 = getRectAtRC(1, 2);
+	drawAnimatedLine({ rect1.left, rect1.top }, { rect2.right, rect2.top }, PS_SOLID, 4, RGB(0, 0, 0));
+	drawAnimatedLine({ rect1.left, rect1.bottom }, { rect2.right, rect2.bottom }, PS_SOLID, 4, RGB(0, 0, 0));
+}
